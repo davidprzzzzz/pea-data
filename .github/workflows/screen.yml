@@ -1,0 +1,30 @@
+name: weekly-rv-screen
+on:
+  schedule:
+    - cron: "23 17 * * 0"   # Sundays 17:23 UTC — data ready before the Monday Claude run
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: screen
+  cancel-in-progress: false
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python screener.py
+      - name: Commit data
+        run: |
+          git config user.name "pea-screener-bot"
+          git config user.email "pea-screener-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "screen $(date -u +%FT%TZ)"
+          git pull --rebase
+          git push

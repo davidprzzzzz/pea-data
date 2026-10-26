@@ -1,0 +1,276 @@
+ticker,name,sector,country
+BNP.PA,BNP Paribas,Banques,France
+GLE.PA,Société Générale,Banques,France
+ACA.PA,Crédit Agricole SA,Banques,France
+SAN.MC,Banco Santander,Banques,Espagne
+BBVA.MC,BBVA,Banques,Espagne
+CABK.MC,CaixaBank,Banques,Espagne
+SAB.MC,Banco Sabadell,Banques,Espagne
+BKT.MC,Bankinter,Banques,Espagne
+UNI.MC,Unicaja Banco,Banques,Espagne
+ISP.MI,Intesa Sanpaolo,Banques,Italie
+UCG.MI,UniCredit,Banques,Italie
+BAMI.MI,Banco BPM,Banques,Italie
+BPE.MI,BPER Banca,Banques,Italie
+BMPS.MI,Banca Monte dei Paschi,Banques,Italie
+FBK.MI,FinecoBank,Banques,Italie
+DBK.DE,Deutsche Bank,Banques,Allemagne
+CBK.DE,Commerzbank,Banques,Allemagne
+INGA.AS,ING Groep,Banques,Pays-Bas
+ABN.AS,ABN AMRO,Banques,Pays-Bas
+KBC.BR,KBC Groupe,Banques,Belgique
+NDA-FI.HE,Nordea,Banques,Finlande
+DNB.OL,DNB Bank,Banques,Norvège
+SEB-A.ST,SEB,Banques,Suède
+SWED-A.ST,Swedbank,Banques,Suède
+SHB-A.ST,Handelsbanken,Banques,Suède
+DANSKE.CO,Danske Bank,Banques,Danemark
+BIRG.IR,Bank of Ireland,Banques,Irlande
+A5G.IR,AIB Group,Banques,Irlande
+EBS.VI,Erste Group,Banques,Autriche
+BG.VI,BAWAG,Banques,Autriche
+RBI.VI,Raiffeisen Bank Intl,Banques,Autriche
+BCP.LS,Millennium BCP,Banques,Portugal
+CS.PA,AXA,Assurance,France
+ALV.DE,Allianz,Assurance,Allemagne
+MUV2.DE,Munich Re,Assurance,Allemagne
+HNR1.DE,Hannover Re,Assurance,Allemagne
+TLX.DE,Talanx,Assurance,Allemagne
+G.MI,Generali,Assurance,Italie
+UNI.MI,Unipol,Assurance,Italie
+PST.MI,Poste Italiane,Assurance,Italie
+AGS.BR,Ageas,Assurance,Belgique
+ASRNL.AS,a.s.r. Nederland,Assurance,Pays-Bas
+NN.AS,NN Group,Assurance,Pays-Bas
+SAMPO.HE,Sampo,Assurance,Finlande
+SCR.PA,SCOR,Assurance,France
+MAP.MC,Mapfre,Assurance,Espagne
+TRYG.CO,Tryg,Assurance,Danemark
+AMUN.PA,Amundi,Services financiers,France
+ENX.PA,Euronext,Services financiers,Pays-Bas
+DB1.DE,Deutsche Börse,Services financiers,Allemagne
+AZM.MI,Azimut,Services financiers,Italie
+BGN.MI,Banca Generali,Services financiers,Italie
+BMED.MI,Banca Mediolanum,Services financiers,Italie
+EQT.ST,EQT,Services financiers,Suède
+TTE.PA,TotalEnergies,Énergie,France
+ENI.MI,Eni,Énergie,Italie
+REP.MC,Repsol,Énergie,Espagne
+GALP.LS,Galp Energia,Énergie,Portugal
+EQNR.OL,Equinor,Énergie,Norvège
+AKRBP.OL,Aker BP,Énergie,Norvège
+OMV.VI,OMV,Énergie,Autriche
+NESTE.HE,Neste,Énergie,Finlande
+TEN.MI,Tenaris,Énergie,Luxembourg
+SPM.MI,Saipem,Énergie,Italie
+VK.PA,Vallourec,Énergie,France
+SBMO.AS,SBM Offshore,Énergie,Pays-Bas
+ENGI.PA,Engie,Utilities,France
+EDP.LS,EDP,Utilities,Portugal
+EDPR.LS,EDP Renováveis,Utilities,Espagne
+ELE.MC,Endesa,Utilities,Espagne
+IBE.MC,Iberdrola,Utilities,Espagne
+NTGY.MC,Naturgy,Utilities,Espagne
+RED.MC,Redeia,Utilities,Espagne
+ENG.MC,Enagás,Utilities,Espagne
+ANE.MC,Acciona Energía,Utilities,Espagne
+ENEL.MI,Enel,Utilities,Italie
+A2A.MI,A2A,Utilities,Italie
+TRN.MI,Terna,Utilities,Italie
+SRG.MI,Snam,Utilities,Italie
+HER.MI,Hera,Utilities,Italie
+EOAN.DE,E.ON,Utilities,Allemagne
+RWE.DE,RWE,Utilities,Allemagne
+VER.VI,Verbund,Utilities,Autriche
+ORSTED.CO,Ørsted,Utilities,Danemark
+ELI.BR,Elia Group,Utilities,Belgique
+FORTUM.HE,Fortum,Utilities,Finlande
+STLAM.MI,Stellantis,Automobile,Pays-Bas
+RNO.PA,Renault,Automobile,France
+VOW3.DE,Volkswagen,Automobile,Allemagne
+BMW.DE,BMW,Automobile,Allemagne
+MBG.DE,Mercedes-Benz,Automobile,Allemagne
+P911.DE,Porsche AG,Automobile,Allemagne
+PAH3.DE,Porsche SE,Automobile,Allemagne
+RACE.MI,Ferrari,Automobile,Pays-Bas
+VOLV-B.ST,Volvo,Automobile,Suède
+DTG.DE,Daimler Truck,Automobile,Allemagne
+8TRA.DE,Traton,Automobile,Allemagne
+CON.DE,Continental,Automobile,Allemagne
+ML.PA,Michelin,Automobile,France
+PIRC.MI,Pirelli,Automobile,Italie
+FRVIA.PA,Forvia,Automobile,France
+FR.PA,Valeo,Automobile,France
+MC.PA,LVMH,Luxe & conso. discrétionnaire,France
+KER.PA,Kering,Luxe & conso. discrétionnaire,France
+RMS.PA,Hermès,Luxe & conso. discrétionnaire,France
+MONC.MI,Moncler,Luxe & conso. discrétionnaire,Italie
+BC.MI,Brunello Cucinelli,Luxe & conso. discrétionnaire,Italie
+ADS.DE,Adidas,Luxe & conso. discrétionnaire,Allemagne
+PUM.DE,Puma,Luxe & conso. discrétionnaire,Allemagne
+ITX.MC,Inditex,Luxe & conso. discrétionnaire,Espagne
+HM-B.ST,H&M,Luxe & conso. discrétionnaire,Suède
+ZAL.DE,Zalando,Luxe & conso. discrétionnaire,Allemagne
+PNDORA.CO,Pandora,Luxe & conso. discrétionnaire,Danemark
+AC.PA,Accor,Luxe & conso. discrétionnaire,France
+SK.PA,SEB SA,Luxe & conso. discrétionnaire,France
+EVO.ST,Evolution,Luxe & conso. discrétionnaire,Suède
+OR.PA,L'Oréal,Conso. de base,France
+BN.PA,Danone,Conso. de base,France
+RI.PA,Pernod Ricard,Conso. de base,France
+CARL-B.CO,Carlsberg,Conso. de base,Danemark
+HEIA.AS,Heineken,Conso. de base,Pays-Bas
+ABI.BR,AB InBev,Conso. de base,Belgique
+BEI.DE,Beiersdorf,Conso. de base,Allemagne
+HEN3.DE,Henkel,Conso. de base,Allemagne
+CA.PA,Carrefour,Conso. de base,France
+AD.AS,Ahold Delhaize,Conso. de base,Pays-Bas
+KRZ.IR,Kerry Group,Conso. de base,Irlande
+CPR.MI,Campari,Conso. de base,Italie
+JMT.LS,Jerónimo Martins,Conso. de base,Portugal
+GL9.IR,Glanbia,Conso. de base,Irlande
+KESKOB.HE,Kesko,Conso. de base,Finlande
+SAN.PA,Sanofi,Santé,France
+EL.PA,EssilorLuxottica,Santé,France
+NOVO-B.CO,Novo Nordisk,Santé,Danemark
+BAYN.DE,Bayer,Santé,Allemagne
+MRK.DE,Merck KGaA,Santé,Allemagne
+SHL.DE,Siemens Healthineers,Santé,Allemagne
+FRE.DE,Fresenius,Santé,Allemagne
+FME.DE,Fresenius Medical Care,Santé,Allemagne
+PHIA.AS,Philips,Santé,Pays-Bas
+ARGX.BR,argenx,Santé,Pays-Bas
+UCB.BR,UCB,Santé,Belgique
+GRF.MC,Grifols,Santé,Espagne
+DIM.PA,Sartorius Stedim,Santé,France
+SRT3.DE,Sartorius,Santé,Allemagne
+IPN.PA,Ipsen,Santé,France
+BIM.PA,bioMérieux,Santé,France
+QIA.DE,Qiagen,Santé,Pays-Bas
+ERF.PA,Eurofins Scientific,Santé,Luxembourg
+COLO-B.CO,Coloplast,Santé,Danemark
+GMAB.CO,Genmab,Santé,Danemark
+DEMANT.CO,Demant,Santé,Danemark
+AMP.MI,Amplifon,Santé,Italie
+REC.MI,Recordati,Santé,Italie
+DIA.MI,DiaSorin,Santé,Italie
+SU.PA,Schneider Electric,Industrie,France
+SIE.DE,Siemens,Industrie,Allemagne
+LR.PA,Legrand,Industrie,France
+ATCO-A.ST,Atlas Copco,Industrie,Suède
+SAND.ST,Sandvik,Industrie,Suède
+EPI-A.ST,Epiroc,Industrie,Suède
+SKF-B.ST,SKF,Industrie,Suède
+ASSA-B.ST,Assa Abloy,Industrie,Suède
+KNEBV.HE,Kone,Industrie,Finlande
+WRT1V.HE,Wärtsilä,Industrie,Finlande
+ALO.PA,Alstom,Industrie,France
+PRY.MI,Prysmian,Industrie,Italie
+NEX.PA,Nexans,Industrie,France
+ENR.DE,Siemens Energy,Industrie,Allemagne
+VWS.CO,Vestas,Industrie,Danemark
+G1A.DE,GEA Group,Industrie,Allemagne
+KGX.DE,Kion,Industrie,Allemagne
+SPIE.PA,Spie,Industrie,France
+DG.PA,Vinci,Construction & matériaux,France
+SGO.PA,Saint-Gobain,Construction & matériaux,France
+EN.PA,Bouygues,Construction & matériaux,France
+FGR.PA,Eiffage,Construction & matériaux,France
+FER.MC,Ferrovial,Construction & matériaux,Pays-Bas
+ACS.MC,ACS,Construction & matériaux,Espagne
+HOT.DE,Hochtief,Construction & matériaux,Allemagne
+SKA-B.ST,Skanska,Construction & matériaux,Suède
+HEI.DE,Heidelberg Materials,Construction & matériaux,Allemagne
+BZU.MI,Buzzi,Construction & matériaux,Italie
+DSV.CO,DSV,Transport & logistique,Danemark
+MAERSK-B.CO,A.P. Møller-Maersk,Transport & logistique,Danemark
+DHL.DE,DHL Group,Transport & logistique,Allemagne
+HLAG.DE,Hapag-Lloyd,Transport & logistique,Allemagne
+RYA.IR,Ryanair,Transport & logistique,Irlande
+AF.PA,Air France-KLM,Transport & logistique,France
+LHA.DE,Lufthansa,Transport & logistique,Allemagne
+IAG.MC,IAG,Transport & logistique,Espagne
+AENA.MC,Aena,Transport & logistique,Espagne
+ADP.PA,Aéroports de Paris,Transport & logistique,France
+GET.PA,Getlink,Transport & logistique,France
+FRA.DE,Fraport,Transport & logistique,Allemagne
+AIR.PA,Airbus,Aéro & défense,Pays-Bas
+SAF.PA,Safran,Aéro & défense,France
+HO.PA,Thales,Aéro & défense,France
+AM.PA,Dassault Aviation,Aéro & défense,France
+RHM.DE,Rheinmetall,Aéro & défense,Allemagne
+LDO.MI,Leonardo,Aéro & défense,Italie
+MTX.DE,MTU Aero Engines,Aéro & défense,Allemagne
+HAG.DE,Hensoldt,Aéro & défense,Allemagne
+R3NK.DE,Renk,Aéro & défense,Allemagne
+KOG.OL,Kongsberg Gruppen,Aéro & défense,Norvège
+SAAB-B.ST,Saab,Aéro & défense,Suède
+FCT.MI,Fincantieri,Aéro & défense,Italie
+EXENS.PA,Exosens,Aéro & défense,France
+ASML.AS,ASML,Tech & semis,Pays-Bas
+ASM.AS,ASM International,Tech & semis,Pays-Bas
+BESI.AS,BE Semiconductor,Tech & semis,Pays-Bas
+STMPA.PA,STMicroelectronics,Tech & semis,Pays-Bas
+IFX.DE,Infineon,Tech & semis,Allemagne
+SOI.PA,Soitec,Tech & semis,France
+AIXA.DE,Aixtron,Tech & semis,Allemagne
+NOKIA.HE,Nokia,Tech & semis,Finlande
+ERIC-B.ST,Ericsson,Tech & semis,Suède
+SAP.DE,SAP,Tech & semis,Allemagne
+CAP.PA,Capgemini,Tech & semis,France
+SOP.PA,Sopra Steria,Tech & semis,France
+DSY.PA,Dassault Systèmes,Tech & semis,France
+NEM.DE,Nemetschek,Tech & semis,Allemagne
+ADYEN.AS,Adyen,Tech & semis,Pays-Bas
+WLN.PA,Worldline,Tech & semis,France
+NEXI.MI,Nexi,Tech & semis,Italie
+PRX.AS,Prosus,Tech & semis,Pays-Bas
+ORA.PA,Orange,Télécoms,France
+DTE.DE,Deutsche Telekom,Télécoms,Allemagne
+TEF.MC,Telefónica,Télécoms,Espagne
+KPN.AS,KPN,Télécoms,Pays-Bas
+TIT.MI,Telecom Italia,Télécoms,Italie
+ELISA.HE,Elisa,Télécoms,Finlande
+TELIA.ST,Telia,Télécoms,Suède
+TEL2-B.ST,Tele2,Télécoms,Suède
+CLNX.MC,Cellnex,Télécoms,Espagne
+INW.MI,Inwit,Télécoms,Italie
+PROX.BR,Proximus,Télécoms,Belgique
+AI.PA,Air Liquide,Chimie & matériaux,France
+BAS.DE,BASF,Chimie & matériaux,Allemagne
+SY1.DE,Symrise,Chimie & matériaux,Allemagne
+AKZA.AS,Akzo Nobel,Chimie & matériaux,Pays-Bas
+DSFIR.AS,DSM-Firmenich,Chimie & matériaux,Pays-Bas
+UMI.BR,Umicore,Chimie & matériaux,Belgique
+SOLB.BR,Solvay,Chimie & matériaux,Belgique
+EVK.DE,Evonik,Chimie & matériaux,Allemagne
+AKE.PA,Arkema,Chimie & matériaux,France
+IMCD.AS,IMCD,Chimie & matériaux,Pays-Bas
+BNR.DE,Brenntag,Chimie & matériaux,Allemagne
+YAR.OL,Yara,Chimie & matériaux,Norvège
+MT.AS,ArcelorMittal,Chimie & matériaux,Luxembourg
+APAM.AS,Aperam,Chimie & matériaux,Luxembourg
+OUT1V.HE,Outokumpu,Chimie & matériaux,Finlande
+NHY.OL,Norsk Hydro,Chimie & matériaux,Norvège
+BOL.ST,Boliden,Chimie & matériaux,Suède
+UPM.HE,UPM-Kymmene,Chimie & matériaux,Finlande
+STERV.HE,Stora Enso,Chimie & matériaux,Finlande
+VNA.DE,Vonovia,Immobilier (hors SIIC/REIT),Allemagne
+LEG.DE,LEG Immobilien,Immobilier (hors SIIC/REIT),Allemagne
+TEG.DE,TAG Immobilien,Immobilier (hors SIIC/REIT),Allemagne
+AT1.DE,Aroundtown,Immobilier (hors SIIC/REIT),Luxembourg
+CAST.ST,Castellum,Immobilier (hors SIIC/REIT),Suède
+FABG.ST,Fabege,Immobilier (hors SIIC/REIT),Suède
+BALD-B.ST,Fastighets Balder,Immobilier (hors SIIC/REIT),Suède
+PUB.PA,Publicis,Services & médias,France
+VIV.PA,Vivendi,Services & médias,France
+UMG.AS,Universal Music Group,Services & médias,Pays-Bas
+BOL.PA,Bolloré,Services & médias,France
+EDEN.PA,Edenred,Services & médias,France
+TEP.PA,Teleperformance,Services & médias,France
+RXL.PA,Rexel,Services & médias,France
+BVI.PA,Bureau Veritas,Services & médias,France
+ELIS.PA,Elis,Services & médias,France
+RAND.AS,Randstad,Services & médias,Pays-Bas
+SW.PA,Sodexo,Services & médias,France
+WKL.AS,Wolters Kluwer,Services & médias,Pays-Bas
