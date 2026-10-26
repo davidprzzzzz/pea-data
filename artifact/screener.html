@@ -1,0 +1,432 @@
+<title>PEA RV Screener</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: trading-desk blotter — macro tape on top, sortable signal blotter left, trade ticket / detail right; tabs for universe, sectors, track record, method. Dark-first. */
+:root{
+  --bg:#0e1319; --panel:#141b23; --panel2:#19222c; --line:#243140; --line2:#2e3d4e;
+  --fg:#d9e1ea; --dim:#8394a6; --faint:#5b6b7d;
+  --accent:#e9a23b; --accent-ink:#1a1206; --accent-soft:rgba(233,162,59,.14);
+  --up:#3fbf7f; --up-soft:rgba(63,191,127,.15); --down:#ef5d5d; --down-soft:rgba(239,93,93,.15);
+  --warn:#d6b33a; --info:#5fa8e8; --info-soft:rgba(95,168,232,.15);
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f5f7; --panel:#ffffff; --panel2:#f7f9fb; --line:#dde3ea; --line2:#c9d2dc;
+  --fg:#16202b; --dim:#5b6b7d; --faint:#8a98a8;
+  --accent:#b86e06; --accent-ink:#fff; --accent-soft:rgba(184,110,6,.10);
+  --up:#13834d; --up-soft:rgba(19,131,77,.10); --down:#c62f2f; --down-soft:rgba(198,47,47,.09);
+  --warn:#9a7a00; --info:#1f6fb8; --info-soft:rgba(31,111,184,.10); color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f5f7; --panel:#ffffff; --panel2:#f7f9fb; --line:#dde3ea; --line2:#c9d2dc;
+  --fg:#16202b; --dim:#5b6b7d; --faint:#8a98a8;
+  --accent:#b86e06; --accent-ink:#fff; --accent-soft:rgba(184,110,6,.10);
+  --up:#13834d; --up-soft:rgba(19,131,77,.10); --down:#c62f2f; --down-soft:rgba(198,47,47,.09);
+  --warn:#9a7a00; --info:#1f6fb8; --info-soft:rgba(31,111,184,.10); color-scheme:light}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font:13px/1.45 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.num,.mono{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.wrap{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 22px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font:700 26px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;margin:0}
+.brand h1 b{color:var(--accent);font-weight:700}
+.brand .wk{font:500 13px var(--f-data);color:var(--dim)}
+.kpis{display:flex;flex-wrap:wrap;gap:4px 18px;margin-left:auto}
+.kpi{display:flex;flex-direction:column}
+.kpi span{font:600 10px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.kpi b{font:500 14px var(--f-data);font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:5px;font:600 10.5px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.pill.sig{background:var(--accent);color:var(--accent-ink)}
+.pill.watch{background:var(--panel2);color:var(--dim);box-shadow:inset 0 0 0 1px var(--line2)}
+.pill.pair{background:var(--info-soft);color:var(--info)}
+.pill.resid{background:var(--accent-soft);color:var(--accent)}
+.pill.fav{background:var(--up-soft);color:var(--up)} .pill.neu{background:var(--panel2);color:var(--dim)} .pill.def{background:var(--down-soft);color:var(--down)}
+.pill.flag{background:transparent;color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+.pill.pea{background:var(--up-soft);color:var(--up)} .pill.peaw{background:transparent;color:var(--warn);box-shadow:inset 0 0 0 1px currentColor}
+
+/* macro tape */
+.tape{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.tile{background:var(--panel);padding:8px 10px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.tile .lab{font:600 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .row{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.tile .last{font:500 15px var(--f-data)}
+.tile .chg{font:500 11.5px var(--f-data)}
+.tile svg{width:100%;height:26px;display:block}
+.zbar{position:relative;height:4px;background:var(--panel2);border-radius:2px}
+.zbar i{position:absolute;top:0;bottom:0;border-radius:2px}
+.zbar:after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line2)}
+.tile .zl{font:500 10px var(--f-data);color:var(--faint)}
+.up{color:var(--up)} .down{color:var(--down)} .dim{color:var(--dim)} .faint{color:var(--faint)}
+
+.brief{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px}
+.box{background:var(--panel);border:1px solid var(--line);padding:10px 12px;min-width:0}
+.box h3,.sec-h{font:600 12px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+.box p{margin:0;max-width:75ch}
+.box .regime{font-family:var(--f-data);font-size:12px;color:var(--fg)}
+
+/* tabs + toolbar */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;padding:8px 14px;font:600 13px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs button .ct{font:500 11px var(--f-data);color:var(--faint);margin-left:5px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:3px;overflow:hidden}
+.seg button{background:var(--panel);border:0;padding:4px 10px;cursor:pointer;font:600 11px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+select,input[type=search]{background:var(--panel);border:1px solid var(--line2);border-radius:3px;padding:4px 8px;font-size:12px}
+input[type=search]{min-width:0;width:170px}
+
+/* main grid */
+.main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:12px;align-items:start}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th{position:sticky;top:0;background:var(--panel2);font:600 10.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line2);white-space:nowrap;cursor:pointer;user-select:none}
+th.l,td.l{text-align:left}
+th[aria-sort="ascending"]:after{content:" ▲";color:var(--accent)} th[aria-sort="descending"]:after{content:" ▼";color:var(--accent)}
+td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-family:var(--f-data);font-variant-numeric:tabular-nums}
+td.l{font-family:var(--f-body)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel2)}
+tbody tr.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.tk{font:600 12px var(--f-data)} .nm{color:var(--dim);font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+.scorebar{display:inline-flex;align-items:center;gap:6px}
+.scorebar i{display:inline-block;width:46px;height:5px;background:var(--panel2);border-radius:3px;position:relative;overflow:hidden}
+.scorebar i b{position:absolute;inset:0 auto 0 0;background:var(--accent)}
+.vdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line2)}
+.vdot.fav{background:var(--up)} .vdot.def{background:var(--down)} .vdot.neu{background:var(--dim)}
+
+/* detail */
+.detail{background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px)}
+.d-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.d-head .t1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.d-head .t1 h2{font:700 24px/1 var(--f-display);letter-spacing:.04em;margin:0}
+.d-head .t1 .n{color:var(--dim)}
+.d-head .tags{display:flex;gap:5px;flex-wrap:wrap}
+.d-body{padding:12px 14px;display:flex;flex-direction:column;gap:14px}
+.ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.ladder div{background:var(--panel2);padding:6px 8px;display:flex;flex-direction:column;gap:1px}
+.ladder span{font:600 10px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.ladder b{font:500 14px var(--f-data);font-variant-numeric:tabular-nums}
+.ladder em{font:500 11px var(--f-data);font-style:normal}
+.chart svg{width:100%;display:block}
+.chart .legend{display:flex;gap:12px;font:500 11px var(--f-data);color:var(--dim);margin-top:2px;flex-wrap:wrap}
+.chart .legend i{display:inline-block;width:10px;height:2px;vertical-align:middle;margin-right:4px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px}
+.kv div{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dotted var(--line);padding-bottom:2px;min-width:0}
+.kv span{color:var(--dim);font-size:11.5px;white-space:nowrap}
+.kv b{font:500 12px var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmp{width:100%;font-size:12px}
+.cmp td,.cmp th{padding:4px 6px;cursor:default}
+.cmp th{position:static}
+.drv{display:flex;flex-direction:column;gap:5px}
+.drv .r{display:grid;grid-template-columns:110px 1fr 56px;gap:8px;align-items:center;font-size:12px}
+.drv .bar{position:relative;height:8px;background:var(--panel2)}
+.drv .bar:after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line2)}
+.drv .bar i{position:absolute;top:0;bottom:0}
+.overlay{border-left:3px solid var(--line2);padding:6px 10px;background:var(--panel2)}
+.overlay.fav{border-left-color:var(--up)} .overlay.def{border-left-color:var(--down)}
+.overlay p{margin:4px 0 0;max-width:70ch}
+.note{font-size:11.5px;color:var(--dim)}
+.empty{padding:40px 16px;text-align:center;color:var(--dim)}
+.empty h3{font:600 18px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);margin:0 0 6px}
+
+/* sectors heatmap */
+.heat td{font-size:11.5px;cursor:default}
+.heat td.c{min-width:64px}
+.foot{color:var(--faint);font-size:11px;border-top:1px solid var(--line);padding-top:8px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
+.meth{columns:2 340px;column-gap:28px}
+.meth section{break-inside:avoid;margin-bottom:14px}
+.meth h4{font:600 13px var(--f-display);letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px;color:var(--accent)}
+.meth p,.meth li{margin:0 0 4px;font-size:12.5px;max-width:70ch}
+.meth ul{padding-left:16px;margin:0}
+
+@media (max-width:1050px){.main{grid-template-columns:1fr}.detail{position:static}.brief{grid-template-columns:1fr}}
+@media (max-width:560px){.kv{grid-template-columns:repeat(2,minmax(0,1fr))}.ladder{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{margin-left:0}.drv .r{grid-template-columns:84px 1fr 50px}input[type=search]{width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>PEA <b>RV</b> Screener</h1><span class="wk" id="wk">—</span></div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section class="tape" id="tape" aria-label="Facteurs macro"></section>
+
+  <section class="brief">
+    <div class="box"><h3>Régime quanti (4 semaines)</h3><p class="regime" id="regime">En attente du premier run.</p></div>
+    <div class="box"><h3>Lecture macro de la semaine</h3><p id="narr" class="dim">La revue macro de Claude apparaît ici après la synchronisation hebdomadaire.</p></div>
+  </section>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="signals" aria-selected="true">Signaux<span class="ct" id="ct-signals"></span></button>
+    <button role="tab" data-tab="universe" aria-selected="false">Univers<span class="ct" id="ct-universe"></span></button>
+    <button role="tab" data-tab="sectors" aria-selected="false">Secteurs</button>
+    <button role="tab" data-tab="track" aria-selected="false">Track record</button>
+    <button role="tab" data-tab="method" aria-selected="false">Méthode</button>
+  </nav>
+
+  <section id="v-signals">
+    <div class="toolbar" style="margin-bottom:8px">
+      <div class="seg" id="f-tier"><button aria-pressed="true" data-v="SIGNAL">Signaux</button><button aria-pressed="false" data-v="WATCH">Watch</button><button aria-pressed="false" data-v="ALL">Tous</button></div>
+      <div class="seg" id="f-type"><button aria-pressed="true" data-v="ALL">Tous</button><button aria-pressed="false" data-v="PAIR">Paires</button><button aria-pressed="false" data-v="RESID">Résidus</button></div>
+      <select id="f-sector" aria-label="Secteur"><option value="">Tous secteurs</option></select>
+      <div class="seg" id="f-mac"><button aria-pressed="false" data-v="1">Macro favorable</button></div>
+    </div>
+    <div class="main">
+      <div class="tablewrap"><table id="t-sig"><thead></thead><tbody></tbody></table><div id="sig-empty"></div></div>
+      <aside class="detail" id="detail"><div class="empty"><h3>Aucune idée sélectionnée</h3>Choisis une ligne du blotter.</div></aside>
+    </div>
+  </section>
+
+  <section id="v-universe" hidden>
+    <div class="toolbar" style="margin-bottom:8px">
+      <input type="search" id="u-q" placeholder="Ticker ou société" aria-label="Rechercher">
+      <select id="u-sector" aria-label="Secteur"><option value="">Tous secteurs</option></select>
+      <span class="note">value z &lt; 0 = décote vs fondamentaux · s = s-score résiduel sectoriel · macro = percentile du score macro</span>
+    </div>
+    <div class="tablewrap" style="max-height:70vh"><table id="t-uni"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="v-sectors" hidden>
+    <p class="note" style="margin:0 0 8px">Bêtas moyens des titres du secteur à un mouvement de 1σ hebdo de chaque facteur (en % de rendement hebdo, contrôle Euro Stoxx 50). Vent porteur = Σ bêta × régime 4 sem.</p>
+    <div class="tablewrap"><table class="heat" id="t-sec"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="v-track" hidden>
+    <div class="kpis" id="trk-kpi" style="margin:0 0 10px"></div>
+    <div class="tablewrap"><table id="t-trk"><thead></thead><tbody></tbody></table><div id="trk-empty"></div></div>
+  </section>
+
+  <section id="v-method" hidden>
+    <div class="box meth">
+      <section><h4>Univers et contrainte PEA</h4><p>Environ 275 actions à siège UE/EEE cotées en Europe. Exclus : Royaume-Uni, Suisse, SIIC/REIT/SOCIMI (exonérées d'IS donc hors PEA). Lignes nordiques éligibles mais pas toujours proposées par les courtiers en PEA. Pas de vente à découvert : chaque signal RV se joue en achetant la jambe bon marché seule, d'où l'overlay macro.</p></section>
+      <section><h4>Paires cointégrées</h4><ul><li>Présélection : corrélation des rendements ≥ 0,5 sur 252 j dans le secteur.</li><li>Engle-Granger sur log-prix 252 j, p &lt; 0,05, confirmé sur 504 j.</li><li>Spread en Ornstein-Uhlenbeck (AR(1)) : demi-vie 3–60 j, Hurst, dérive du ratio de couverture, bêta Kalman.</li><li>Signal à |z| ≥ 2. Backtest walk-forward hors échantillon.</li></ul></section>
+      <section><h4>Résidu sectoriel (Avellaneda-Lee)</h4><p>Rendement du titre régressé sur 60 j contre le panier équipondéré de ses pairs. Résidu cumulé modélisé en OU, filtre κ &gt; 252/30. Achat à s-score &lt; −1,25, sortie à −0,5.</p></section>
+      <section><h4>Valorisation (Damodaran)</h4><p>Régressions de marché à effets fixes sectoriels : P/E forward sur croissance, ROE, bêta et payout ; EV/EBITDA sur croissance CA, marge et bêta ; P/B sur ROE pour les financières. Le résidu donne la décote non expliquée par les fondamentaux.</p></section>
+      <section><h4>Macro</h4><p>Bêtas ridge de chaque titre (104 semaines) aux mouvements de VSTOXX, taux US 10 ans, EUR/USD, Brent, TTF, cuivre et or, en contrôlant l'Euro Stoxx 50. Le régime des 4 dernières semaines multiplie ces bêtas. Claude ajoute chaque semaine une lecture qualitative et un verdict par idée.</p></section>
+      <section><h4>Score et niveaux</h4><p>Score : 30 % force du signal, 25 % qualité statistique, 20 % valorisation, 20 % macro, 5 % rendement/risque ; bonus si plusieurs signaux indépendants. TP au retour à l'équilibre, SL à max(1,5 σ_eq ; 1,25 × vol × √demi-vie), horizon 2 × demi-vie.</p></section>
+      <section><h4>Limites</h4><p>Des centaines de paires testées : des faux positifs sont attendus, d'où la double fenêtre et le backtest. Le rendement des stratégies de paires a beaucoup baissé depuis les années 2000. Données yfinance gratuites, fondamentaux parfois incomplets.</p></section>
+    </div>
+  </section>
+
+  <footer class="foot"><span id="foot-l">Données : yfinance via GitHub Actions · davidprzzzzz/pea-data</span><span>Recherche et éducation, pas un conseil en investissement.</span></footer>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const S={state:null,universe:[],ideas:[],sel:null,tier:"SIGNAL",type:"ALL",sector:"",macOnly:false,sort:{k:"score",d:-1},usort:{k:"vz",d:1},uq:"",usec:""};
+const FLAG={falling_knife:"Chute >15 % sur 20 j",earnings_soon:"Résultats sous 10 j",rich_on_fundamentals:"Cher vs fondamentaux",nordic_listing:"Ligne nordique : vérifier l'offre PEA du courtier",unstable_hedge_ratio:"Ratio de couverture instable"};
+const EEA=new Set(["France","Allemagne","Italie","Espagne","Pays-Bas","Belgique","Portugal","Irlande","Autriche","Finlande","Luxembourg","Suède","Danemark","Norvège","Grèce","Islande","Liechtenstein"]);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const f=(v,d=2)=>v==null||!isFinite(v)?"—":Number(v).toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(v,d=1,sign=true)=>v==null||!isFinite(v)?"—":(sign&&v>0?"+":"")+f(v*100,d)+" %";
+const cls=v=>v==null?"":v>0?"up":v<0?"down":"";
+const px=v=>v==null?"—":f(v,v>=1000?0:v>=100?1:2);
+const vClass=o=>!o?"":o.verdict==="favorable"?"fav":o.verdict==="défavorable"?"def":"neu";
+
+/* ---------- sparkline / charts ---------- */
+function spark(vals,w=140,h=26){
+  const v=(vals||[]).filter(x=>x!=null); if(v.length<2) return "";
+  const lo=Math.min(...v),hi=Math.max(...v),r=hi-lo||1;
+  const pts=v.map((y,i)=>[i/(v.length-1)*w,h-2-(y-lo)/r*(h-4)]);
+  const d=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+  const col=v[v.length-1]>=v[0]?"var(--up)":"var(--down)";
+  const e=pts[pts.length-1];
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d} L${w},${h} L0,${h}Z" fill="${col}" opacity=".1"/><path d="${d}" fill="none" stroke="${col}" stroke-width="1.3" vector-effect="non-scaling-stroke"/><circle cx="${e[0]}" cy="${e[1]}" r="2" fill="${col}"/></svg>`;
+}
+function zChart(idea){
+  const s=idea.series||{}; const z=s.z||[]; const n=z.length; if(n<5) return "";
+  const W=560,H=150,pl=34,pr=8,pt=8,pb=18, entry=idea.type==="PAIR"?2:1.25;
+  const vals=z.filter(v=>v!=null); const lim=Math.max(3,Math.ceil(Math.max(...vals.map(Math.abs))+0.3));
+  const X=i=>pl+i/(n-1)*(W-pl-pr), Y=v=>pt+(lim-v)/(2*lim)*(H-pt-pb);
+  let g="";
+  for(let t=-lim;t<=lim;t++){ if(t%1) continue; const y=Y(t);
+    g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl-5}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--faint)" font-family="JetBrains Mono,monospace">${t>0?"+":""}${t}</text>`;}
+  g+=`<rect x="${pl}" y="${Y(-entry)}" width="${W-pl-pr}" height="${H-pb-Y(-entry)}" fill="var(--up)" opacity=".06"/>`;
+  g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(-entry)}" y2="${Y(-entry)}" stroke="var(--up)" stroke-dasharray="4 3" stroke-width="1"/>`;
+  g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(entry)}" y2="${Y(entry)}" stroke="var(--down)" stroke-dasharray="4 3" stroke-width="1" opacity=".6"/>`;
+  g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line2)" stroke-width="1"/>`;
+  let d="",pen=false; z.forEach((v,i)=>{ if(v==null){pen=false;return;} d+=(pen?"L":"M")+X(i).toFixed(1)+","+Y(v).toFixed(1); pen=true; });
+  g+=`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`;
+  const li=z.length-1; if(z[li]!=null) g+=`<circle cx="${X(li)}" cy="${Y(z[li])}" r="3.2" fill="var(--accent)"/><text x="${X(li)-6}" y="${Y(z[li])+(z[li]<0?14:-6)}" text-anchor="end" font-size="10" fill="var(--accent)" font-family="JetBrains Mono,monospace">${f(z[li],2)}</text>`;
+  const dts=s.dates||[]; [0,Math.floor(n/2),n-1].forEach(i=>{ if(dts[i]) g+=`<text x="${X(i)}" y="${H-4}" text-anchor="${i===0?"start":i===n-1?"end":"middle"}" font-size="9" fill="var(--faint)" font-family="JetBrains Mono,monospace">${dts[i].slice(2)}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Historique du z-score">${g}</svg>`;
+}
+function legsChart(idea){
+  const s=idea.series||{}, a=s.long||[], b=s.ref||[]; const n=Math.min(a.length,b.length); if(n<5) return "";
+  const W=560,H=110,pl=34,pr=8,pt=6,pb=14; const all=[...a,...b].filter(v=>v!=null);
+  const lo=Math.min(...all),hi=Math.max(...all),r=hi-lo||1;
+  const X=i=>pl+i/(n-1)*(W-pl-pr), Y=v=>pt+(hi-v)/r*(H-pt-pb);
+  const path=arr=>arr.slice(0,n).map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+","+Y(v).toFixed(1)).join("");
+  let g=""; [lo,(lo+hi)/2,hi].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${pl-5}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="var(--faint)" font-family="JetBrains Mono,monospace">${f(v,0)}</text>`;});
+  g+=`<path d="${path(b)}" fill="none" stroke="var(--dim)" stroke-width="1.3" stroke-dasharray="3 2"/><path d="${path(a)}" fill="none" stroke="var(--info)" stroke-width="1.6"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Jambes rebasées à 100">${g}</svg>`;
+}
+
+/* ---------- header / macro ---------- */
+function renderHeader(){
+  const st=S.state; if(!st) return; const m=st.meta;
+  $("#wk").textContent=`${m.week} · clôture ${m.as_of}`;
+  const k=[["Univers",`${m.priced_n}/${m.universe_n}`],["Paires testées",m.pairs_tested],["Cointégrées",m.pairs_cointegrated],["Signaux",m.n_signals],["Watch",m.n_watch],["Revue macro",st.overlay_at?st.overlay_at.slice(0,10):"en attente"]];
+  $("#kpis").innerHTML=k.map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${esc(b)}</b></div>`).join("");
+  $("#regime").textContent=st.macro?.regime_text||"—";
+  if(st.narrative){$("#narr").textContent=st.narrative;$("#narr").classList.remove("dim");}
+  $("#tape").innerHTML=(st.macro?.factors||[]).map(t=>{
+    const z=t.z4||0, w=Math.min(Math.abs(z)/3,1)*50;
+    return `<div class="tile" title="${esc(t.symbol||"")}"><div class="lab">${esc(t.label)}</div>
+      <div class="row"><span class="last num">${px(t.last)}</span><span class="chg ${cls(t.chg_4w)}">${t.chg_4w>0?"+":""}${f(t.chg_4w,t.chg_unit==="pb"?0:1)}${t.chg_unit==="pb"?" pb":" %"} 4s</span></div>
+      ${spark(t.spark)}
+      <div class="zbar"><i style="${z>=0?"left:50%":"right:50%"};width:${w}%;background:${z>=0?"var(--accent)":"var(--info)"}"></i></div>
+      <div class="row zl"><span>z4 ${z>0?"+":""}${f(z,1)}</span><span>${f(t.pctile_1y,0)}e pct 1 an</span></div></div>`;}).join("");
+  $("#foot-l").textContent=`Données yfinance via GitHub Actions · run ${m.generated_at.replace("T"," ").slice(0,16)} UTC${m.synthetic?" · DONNÉES SIMULÉES":""}`;
+  const secs=[...new Set(S.universe.map(r=>r.sec).concat(S.ideas.map(i=>i.sector)))].sort((a,b)=>a.localeCompare(b,"fr"));
+  for(const id of ["#f-sector","#u-sector"]){const el=$(id),cur=el.value; el.innerHTML=`<option value="">Tous secteurs</option>`+secs.map(s=>`<option ${s===cur?"selected":""}>${esc(s)}</option>`).join("");}
+}
+
+/* ---------- signals blotter ---------- */
+const SIGCOLS=[
+ ["rank","#",i=>i.rank,i=>i.rank,""],
+ ["tier","Statut",i=>i.tier,i=>`<span class="pill ${i.tier==="SIGNAL"?"sig":"watch"}">${i.tier==="SIGNAL"?"Signal":"Watch"}</span>`,"l"],
+ ["type","Type",i=>i.type,i=>`<span class="pill ${i.type==="PAIR"?"pair":"resid"}">${i.type==="PAIR"?"Paire":"Résidu"}</span>`,"l"],
+ ["long","Achat",i=>i.long.ticker,i=>`<span class="tk">${esc(i.long.ticker)}</span> <span class="nm">${esc(i.long.name)}</span>`,"l"],
+ ["ref","Contre",i=>i.ref.ticker||"~",i=>i.ref.ticker?`<span class="mono">${esc(i.ref.ticker)}</span>`:`<span class="faint">panier sect.</span>`,"l"],
+ ["z","z / s",i=>i.stats.z,i=>`<span class="down">${f(i.stats.z,2)}</span>`,""],
+ ["hl","Demi-vie",i=>i.stats.half_life,i=>f(i.stats.half_life,0)+"j",""],
+ ["bt","Hit BT",i=>i.backtest?.hit??-1,i=>i.backtest?.n?`${f(i.backtest.hit*100,0)}%<span class="faint"> /${i.backtest.n}</span>`:"—",""],
+ ["vz","Value z",i=>i.value?.value_z??0,i=>`<span class="${cls(-(i.value?.value_z??0))}">${f(i.value?.value_z,2)}</span>`,""],
+ ["mac","Macro",i=>i.macro?.pctile??-1,i=>i.macro?f(i.macro.pctile,0):"—",""],
+ ["exp","Cible",i=>i.levels.exp_pct,i=>`<span class="up">${pct(i.levels.exp_pct)}</span>`,""],
+ ["risk","Risque",i=>i.levels.risk_pct,i=>`<span class="down">−${f(i.levels.risk_pct*100,1)} %</span>`,""],
+ ["rr","R/R",i=>i.levels.rr,i=>f(i.levels.rr,2),""],
+ ["vd","Avis",i=>({fav:2,neu:1,def:0}[vClass(i.overlay)]??-1),i=>`<span class="vdot ${vClass(i.overlay)}" title="${esc(i.overlay?.verdict||"pas encore revu")}"></span>`,""],
+ ["score","Score",i=>i.score,i=>`<span class="scorebar">${f(i.score,0)}<i><b style="width:${Math.max(0,Math.min(100,i.score))}%"></b></i></span>`,""]];
+function filtered(){
+  return S.ideas.filter(i=>(S.tier==="ALL"||i.tier===S.tier)&&(S.type==="ALL"||i.type===S.type)&&(!S.sector||i.sector===S.sector)&&(!S.macOnly||i.overlay?.verdict==="favorable"));
+}
+function renderSignals(){
+  const thead=$("#t-sig thead"), tb=$("#t-sig tbody");
+  thead.innerHTML="<tr>"+SIGCOLS.map(c=>`<th class="${c[4]}" data-k="${c[0]}" aria-sort="${S.sort.k===c[0]?(S.sort.d>0?"ascending":"descending"):"none"}">${c[1]}</th>`).join("")+"</tr>";
+  const col=SIGCOLS.find(c=>c[0]===S.sort.k)||SIGCOLS[0];
+  const rows=filtered().sort((a,b)=>{const x=col[2](a),y=col[2](b); return (x>y?1:x<y?-1:0)*S.sort.d;});
+  tb.innerHTML=rows.map(i=>`<tr data-id="${esc(i._slot)}" class="${S.sel===i._slot?"sel":""}" tabindex="0">`+SIGCOLS.map(c=>`<td class="${c[4]}">${c[3](i)}</td>`).join("")+"</tr>").join("");
+  $("#ct-signals").textContent=S.ideas.filter(i=>i.tier==="SIGNAL").length||"";
+  $("#sig-empty").innerHTML=rows.length?"":(S.ideas.length?`<div class="empty">Aucune idée pour ces filtres.</div>`:`<div class="empty"><h3>Screen en attente</h3>Les signaux arrivent après le premier run hebdomadaire (dimanche soir) et la synchronisation du lundi matin.</div>`);
+  if(!S.sel&&rows.length){S.sel=rows[0]._slot; tb.firstElementChild.classList.add("sel");}
+  renderDetail();
+}
+function renderDetail(){
+  const i=S.ideas.find(x=>x._slot===S.sel), el=$("#detail");
+  if(!i){el.innerHTML=`<div class="empty"><h3>Aucune idée sélectionnée</h3>Choisis une ligne du blotter.</div>`;return;}
+  const L=i.long, lv=i.levels, st=i.stats, v=i.value||{}, rv=i.ref.value||{}, m=i.macro||{}, bt=i.backtest||{}, ov=i.overlay;
+  const pea=EEA.has(L.country)?`<span class="pill pea">PEA · siège ${esc(L.country)}</span>`:`<span class="pill peaw">PEA à vérifier · ${esc(L.country)}</span>`;
+  const flags=(i.flags||[]).map(k=>`<span class="pill flag" title="${esc(FLAG[k]||k)}">${esc(FLAG[k]||k)}</span>`).join("");
+  const isPair=i.type==="PAIR";
+  const statKV=isPair?[["z-score",f(st.z,2)],["p coint. 1 an",f(st.coint_p,3)],["p coint. 2 ans",f(st.coint_p_2y,3)],["Demi-vie",f(st.half_life,1)+" j"],["Hurst",f(st.hurst,2)],["Corrélation",f(st.corr,2)],["Hedge OLS",f(st.hedge_ratio,2)],["Bêta Kalman",f(st.kalman_beta,2)],["Dérive hedge",pct(st.beta_drift,0,false)]]
+    :[["s-score",f(st.z,2)],["κ (annuel)",f(st.kappa,1)],["Demi-vie",f(st.half_life,1)+" j"],["Bêta secteur",f(st.sector_beta,2)],["σ éq.",pct(st.sigma_eq,1,false)],["Vol. annuelle",pct(L.vol_ann,0,false)]];
+  const btKV=bt.n?[["Trades",bt.n],["Retour à l'équilibre",pct(bt.hit,0,false)],["Trades gagnants",pct(bt.pos_rate,0,false)],["Gain moyen (long)",pct(bt.avg,2)],["Gain moyen couvert",pct(bt.avg_hedged,2)],["Durée moyenne",f(bt.days,0)+" j"]]:[];
+  const cmpRow=(lab,a,b,c)=>`<tr><td class="l dim">${lab}</td><td>${a}</td><td>${b}</td><td>${c}</td></tr>`;
+  const drivers=(m.drivers||[]).map(d=>{const w=Math.min(Math.abs(d.contrib)/0.6,1)*50;return `<div class="r"><span>${esc(labelOf(d.f))}<span class="faint mono"> z${d.z4>0?"+":""}${f(d.z4,1)}</span></span><div class="bar"><i style="${d.contrib>=0?"left:50%":"right:50%"};width:${w}%;background:${d.contrib>=0?"var(--up)":"var(--down)"}"></i></div><span class="mono ${cls(d.contrib)}" style="text-align:right">${d.contrib>0?"+":""}${f(d.contrib,2)}</span></div>`;}).join("");
+  const conf=(i.confirmations||[]).length?`<div class="note">Confirmé par ${i.confirmations.length} autre(s) signal(aux) : ${i.confirmations.map(c=>`${c.type==="PAIR"?"vs "+esc(c.ref):"résidu sect."} (z ${f(c.z,2)})`).join(", ")}</div>`:"";
+  el.innerHTML=`<div class="d-head">
+      <div class="t1"><h2>${esc(L.ticker)}</h2><span class="n">${esc(L.name)}</span><span class="faint">${isPair?"vs "+esc(i.ref.ticker)+" · "+esc(i.ref.name):"vs "+esc(i.ref.name)}</span></div>
+      <div class="tags"><span class="pill ${i.tier==="SIGNAL"?"sig":"watch"}">${i.tier}</span><span class="pill ${isPair?"pair":"resid"}">${isPair?"Paire cointégrée":"Résidu sectoriel"}</span>${pea}<span class="pill watch">${esc(i.sector)}</span>${flags}</div>
+    </div>
+    <div class="d-body">
+      <div class="ladder">
+        <div><span>Entrée</span><b>${px(lv.entry)}</b><em class="faint">${esc(L.currency)}</em></div>
+        <div><span>Objectif</span><b class="up">${px(lv.tp)}</b><em class="up">${pct(lv.exp_pct)}</em></div>
+        <div><span>Stop</span><b class="down">${px(lv.sl)}</b><em class="down">−${f(lv.risk_pct*100,1)} %</em></div>
+        <div><span>Horizon · R/R</span><b>${lv.horizon_days} j</b><em class="dim">R/R ${f(lv.rr,2)} · score ${f(i.score,0)}</em></div>
+      </div>
+      ${ov?`<div class="overlay ${vClass(ov)}"><h3 class="sec-h" style="margin:0">Avis macro · <span class="pill ${vClass(ov)}">${esc(ov.verdict)}</span></h3><p>${esc(ov.note)}</p>${ov.catalysts?`<p class="note">Catalyseurs : ${esc(ov.catalysts)}</p>`:""}</div>`:`<div class="overlay"><span class="note">Pas encore revu par la lecture macro hebdomadaire.</span></div>`}
+      <div class="chart"><h3 class="sec-h">${isPair?"Spread (z)":"s-score résiduel"} · 180 j</h3>${zChart(i)}<div class="legend"><span><i style="background:var(--accent)"></i>${isPair?"z du spread, vu de la jambe achetée":"s-score glissant 60 j"}</span><span><i style="background:var(--up)"></i>seuil d'entrée</span></div></div>
+      <div class="chart"><h3 class="sec-h">Prix rebasés (EUR, base 100)</h3>${legsChart(i)}<div class="legend"><span><i style="background:var(--info)"></i>${esc(L.ticker)}</span><span><i style="background:var(--dim)"></i>${isPair?esc(i.ref.ticker):"panier secteur"}</span></div></div>
+      <div><h3 class="sec-h">Statistiques</h3><div class="kv">${statKV.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>${conf}</div>
+      <div><h3 class="sec-h">Backtest walk-forward (hors échantillon, ~2 ans)</h3>${btKV.length?`<div class="kv">${btKV.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>`:`<div class="note">Pas assez d'occurrences passées pour un backtest.</div>`}</div>
+      <div><h3 class="sec-h">Valorisation relative</h3><div style="overflow-x:auto"><table class="cmp"><thead><tr><th class="l"></th><th>${esc(L.ticker)}</th><th>${isPair?esc(i.ref.ticker):"—"}</th><th>Méd. secteur</th></tr></thead><tbody>
+        ${cmpRow("P/E forward",f(v.fpe,1),isPair?f(rv.fpe,1):"—",f(v.sec_fpe,1))}
+        ${cmpRow("EV/EBITDA",f(v.ev_ebitda,1),isPair?f(rv.ev_ebitda,1):"—",f(v.sec_ev_ebitda,1))}
+        ${cmpRow("P/B",f(v.pb,2),isPair?f(rv.pb,2):"—",f(v.sec_pb,2))}
+        ${cmpRow("ROE",pct(v.roe,1,false),isPair?pct(rv.roe,1,false):"—","")}
+        ${cmpRow("Value z (rég.)",`<span class="${cls(-(v.value_z??0))}">${f(v.value_z,2)}</span>`,isPair?f(rv.value_z,2):"—","")}
+      </tbody></table></div><div class="note">Objectif analystes ${px(L.target)} (${L.n_analysts??"—"} analystes) · résultats ${esc(L.earnings_date||"n.d.")}</div></div>
+      <div><h3 class="sec-h">Exposition macro · percentile ${f(m.pctile,0)}</h3>${drivers?`<div class="drv">${drivers}</div><div class="note">Contribution = bêta du titre × régime 4 sem., en % de rendement hebdo. R² macro ${f(m.r2,2)}.</div>`:`<div class="note">Données macro indisponibles.</div>`}</div>
+    </div>`;
+}
+function labelOf(k){const t=(S.state?.macro?.factors||[]).find(x=>x.key===k);return t?t.label:k;}
+
+/* ---------- universe ---------- */
+const UCOLS=[["t","Ticker","l",r=>`<span class="tk">${esc(r.t)}</span>`],["n","Société","l",r=>`<span class="nm" style="max-width:190px">${esc(r.n)}</span>`],["sec","Secteur","l",r=>`<span class="dim">${esc(r.sec)}</span>`],["ctry","Siège","l",r=>esc(r.ctry)],["px","Cours","",r=>px(r.px)],["r1w","1 sem.","",r=>`<span class="${cls(r.r1w)}">${pct(r.r1w)}</span>`],["r1m","1 mois","",r=>`<span class="${cls(r.r1m)}">${pct(r.r1m)}</span>`],["r3m","3 mois","",r=>`<span class="${cls(r.r3m)}">${pct(r.r3m)}</span>`],["vol","Vol.","",r=>pct(r.vol,0,false)],["fpe","P/E fwd","",r=>f(r.fpe,1)],["ev","EV/EBITDA","",r=>f(r.ev,1)],["pb","P/B","",r=>f(r.pb,2)],["vz","Value z","",r=>`<span class="${cls(-(r.vz??0))}">${f(r.vz,2)}</span>`],["s","s-score","",r=>`<span class="${r.s!=null&&r.s<-1.25?"down":""}">${f(r.s,2)}</span>`],["mac","Macro","",r=>f(r.mac,0)],["sig","Signal","l",r=>r.sig?`<span class="pill ${r.sig.startsWith("SIGNAL")?"sig":"watch"}">${r.sig.split(":")[1]==="PAIR"?"Paire":"Résidu"}</span>`:""],["ed","Résultats","",r=>esc(r.ed||"")]];
+function renderUniverse(){
+  $("#t-uni thead").innerHTML="<tr>"+UCOLS.map(c=>`<th class="${c[2]}" data-k="${c[0]}" aria-sort="${S.usort.k===c[0]?(S.usort.d>0?"ascending":"descending"):"none"}">${c[1]}</th>`).join("")+"</tr>";
+  const q=S.uq.toLowerCase(), k=S.usort.k;
+  const rows=S.universe.filter(r=>(!S.usec||r.sec===S.usec)&&(!q||r.t.toLowerCase().includes(q)||r.n.toLowerCase().includes(q)))
+    .sort((a,b)=>{const x=a[k],y=b[k]; if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1; return (x>y?1:x<y?-1:0)*S.usort.d;});
+  $("#t-uni tbody").innerHTML=rows.map(r=>`<tr>`+UCOLS.map(c=>`<td class="${c[2]}">${c[3](r)}</td>`).join("")+`</tr>`).join("")||`<tr><td class="l dim" colspan="${UCOLS.length}">Aucun titre.</td></tr>`;
+  $("#ct-universe").textContent=S.universe.length||"";
+}
+
+/* ---------- sectors ---------- */
+function renderSectors(){
+  const st=S.state; if(!st){$("#t-sec tbody").innerHTML="";return;}
+  const fk=(st.macro.factors||[]).map(x=>x.key).filter(k=>k!=="SX5E");
+  const secs=[...(st.sectors||[])].sort((a,b)=>(b.tailwind||0)-(a.tailwind||0));
+  const maxb=Math.max(0.01,...secs.flatMap(s=>fk.map(k=>Math.abs(s.betas[k]||0))));
+  const cell=v=>{const a=Math.min(Math.abs(v||0)/maxb,1)*0.55; const c=v>=0?"63,191,127":"239,93,93"; return `<td class="c" style="background:rgba(${c},${a.toFixed(2)})">${v>0?"+":""}${f(v,2)}</td>`;};
+  $("#t-sec thead").innerHTML=`<tr><th class="l">Secteur</th><th>Titres</th><th>Vent porteur</th><th>1 sem.</th><th>1 mois</th><th>3 mois</th><th>Signaux</th>${fk.map(k=>`<th>β ${esc(labelOf(k))}</th>`).join("")}</tr>`;
+  $("#t-sec tbody").innerHTML=secs.map(s=>`<tr><td class="l">${esc(s.sector)}</td><td>${s.n}</td><td class="${cls(s.tailwind)}">${s.tailwind>0?"+":""}${f(s.tailwind,2)}</td><td class="${cls(s.ret_1w)}">${pct(s.ret_1w)}</td><td class="${cls(s.ret_1m)}">${pct(s.ret_1m)}</td><td class="${cls(s.ret_3m)}">${pct(s.ret_3m)}</td><td>${s.n_signals||""}</td>${fk.map(k=>cell(s.betas[k])).join("")}</tr>`).join("");
+}
+
+/* ---------- track ---------- */
+function renderTrack(){
+  const t=S.state?.track||{summary:{},rows:[]}, sm=t.summary||{};
+  const lab={tp:["Objectif atteint","up"],sl:["Stop touché","down"],expired:["Expiré","dim"],open:["En cours","dim"]};
+  $("#trk-kpi").innerHTML=[["Idées suivies",sm.n??0],["Clôturées",sm.closed??0],["Taux d'objectif",sm.hit!=null?pct(sm.hit,0,false):"—"],["Rendement moyen",sm.avg_ret!=null?pct(sm.avg_ret,2):"—"],["En cours",sm.open??0]].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+  $("#t-trk thead").innerHTML=`<tr><th class="l">Semaine</th><th class="l">Titre</th><th class="l">Type</th><th>Entrée</th><th>Objectif</th><th>Stop</th><th>Dernier</th><th>Perf.</th><th class="l">Statut</th><th>Clôture</th></tr>`;
+  const rows=[...(t.rows||[])].reverse();
+  $("#t-trk tbody").innerHTML=rows.map(r=>`<tr><td class="l mono">${esc(r.week)}</td><td class="l"><span class="tk">${esc(r.ticker)}</span> <span class="nm">${esc(r.name)}</span></td><td class="l"><span class="pill ${r.type==="PAIR"?"pair":"resid"}">${r.type==="PAIR"?"Paire":"Résidu"}</span></td><td>${px(r.entry)}</td><td>${px(r.tp)}</td><td>${px(r.sl)}</td><td>${px(r.last)}</td><td class="${cls(r.ret)}">${pct(r.ret)}</td><td class="l ${lab[r.status]?.[1]||""}">${lab[r.status]?.[0]||r.status}</td><td>${esc(r.close_date||"")}</td></tr>`).join("");
+  $("#trk-empty").innerHTML=rows.length?"":`<div class="empty"><h3>Pas encore d'historique</h3>Chaque signal publié est suivi automatiquement contre les cours réels dès la semaine suivante.</div>`;
+}
+
+/* ---------- interactions ---------- */
+function renderAll(){renderHeader();renderSignals();renderUniverse();renderSectors();renderTrack();}
+function seg(id,key,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(id==="#f-mac"){S.macOnly=!S.macOnly;b.setAttribute("aria-pressed",S.macOnly);} else {S[key]=b.dataset.v;$$(id+" button").forEach(x=>x.setAttribute("aria-pressed",x===b));}
+  S.sel=null;cb();});}
+seg("#f-tier","tier",renderSignals); seg("#f-type","type",renderSignals); seg("#f-mac","mac",renderSignals);
+$("#f-sector").addEventListener("change",e=>{S.sector=e.target.value;S.sel=null;renderSignals();});
+$("#t-sig thead").addEventListener("click",e=>{const th=e.target.closest("th");if(!th)return;const k=th.dataset.k;S.sort=S.sort.k===k?{k,d:-S.sort.d}:{k,d:["rank","z","risk"].includes(k)?1:-1};renderSignals();});
+const pick=e=>{const tr=e.target.closest("tr[data-id]");if(!tr)return;S.sel=tr.dataset.id;$$("#t-sig tbody tr").forEach(r=>r.classList.toggle("sel",r===tr));renderDetail();if(window.innerWidth<1050)$("#detail").scrollIntoView({behavior:"smooth",block:"start"});};
+$("#t-sig tbody").addEventListener("click",pick);
+$("#t-sig tbody").addEventListener("keydown",e=>{if(e.key==="Enter")pick(e);});
+$("#t-uni thead").addEventListener("click",e=>{const th=e.target.closest("th");if(!th)return;const k=th.dataset.k;S.usort=S.usort.k===k?{k,d:-S.usort.d}:{k,d:1};renderUniverse();});
+$("#u-q").addEventListener("input",e=>{S.uq=e.target.value;renderUniverse();});
+$("#u-sector").addEventListener("change",e=>{S.usec=e.target.value;renderUniverse();});
+function showTab(t){$$("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));["signals","universe","sectors","track","method"].forEach(x=>$("#v-"+x).hidden=x!==t);try{localStorage.setItem("rv-tab",t)}catch(e){}}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showTab(b.dataset.tab);});
+const h=(location.hash||"").slice(1); let t0="signals"; try{t0=localStorage.getItem("rv-tab")||t0}catch(e){} if(["signals","universe","sectors","track","method"].includes(h)) t0=h; showTab(t0);
+renderAll();
+
+/* ---------- data ---------- */
+(async()=>{
+  const db=await (window.claude?.use?window.claude.use("db"):null);
+  if(!db){$("#sig-empty").innerHTML=`<div class="empty"><h3>Base de données indisponible</h3>Ouvre la page connecté à claude.ai pour charger le screen.</div>`;return;}
+  db.doc("meta/state").onSnapshot(s=>{S.state=s.exists?s.data():null;renderAll();},()=>{});
+  db.doc("universe/all").onSnapshot(s=>{S.universe=s.exists?(s.data().rows||[]):[];renderHeader();renderUniverse();},()=>{});
+  db.collection("ideas").where("active","==",true).onSnapshot(q=>{S.ideas=q.docs.map(d=>Object.assign({_slot:d.id},d.data()));if(S.sel&&!S.ideas.find(i=>i._slot===S.sel))S.sel=null;renderHeader();renderSignals();},()=>{});
+})();
+})();
+</script>

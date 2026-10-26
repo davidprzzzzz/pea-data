@@ -58,6 +58,9 @@ RESID_WIN = 60          # Avellaneda-Lee window
 MIN_CORR = 0.50         # pre-filter on daily return correlation
 COINT_P = 0.05
 HL_MIN, HL_MAX = 3, 60
+RESID_HL_MIN = 3        # a weekly process cannot trade a residual that reverts in 1-2 days
+BETA_MIN, BETA_MAX = 0.25, 4.0
+MAX_EXP = 0.30          # sanity cap on the expected move to TP
 Z_ENTRY, Z_WATCH, Z_EXIT, Z_STOP = 2.0, 1.5, 0.5, 3.5
 S_ENTRY, S_WATCH, S_EXIT = 1.25, 1.0, 0.5
 KAPPA_MIN = 252 / 30
@@ -145,7 +148,8 @@ def yf_fundamentals(tickers):
             ed = cal.get("Earnings Date") if isinstance(cal, dict) else None
             if ed:
                 ed = ed[0] if isinstance(ed, (list, tuple)) else ed
-                d["earnings_date"] = str(ed)[:10]
+                if str(ed)[:10] >= dt.date.today().isoformat():
+                    d["earnings_date"] = str(ed)[:10]
         except Exception:
             pass
         res[t] = d
@@ -331,7 +335,7 @@ def scan_pairs(lpx, universe):
             y, x = la_full[-FORM_WIN:], lb_full[-FORM_WIN:]
             tested += 1
             a, b, s = ols(y, x)
-            if b <= 0.1 or b > 10:
+            if not (BETA_MIN <= b <= BETA_MAX):
                 continue
             p = coint_p(y, x)
             if p >= COINT_P:
@@ -353,10 +357,19 @@ def scan_pairs(lpx, universe):
             beta_stab = abs(b1 - b2) / max(abs(b), 1e-6)
             kb = kalman_beta(y, x)
             lng = "A" if z < 0 else "B"
+            # leg-specific OU (long leg as dependent variable) -> symmetric TP/SL
+            if lng == "A":
+                leg_ou = dict(ou, last=s[-1])
+            else:
+                _, bb, sb = ols(x, y)
+                o2 = ar1_ou(sb)
+                if not o2 or not (BETA_MIN <= bb <= BETA_MAX):
+                    continue
+                leg_ou = dict(o2, last=sb[-1])
             bt = wf_backtest_pair(la_full, lb_full, lng)
             found.append(dict(sector=sec, A=A, B=B, corr=float(c), alpha=a, beta=b, p=p, p_long=p2,
                               ou=ou, hurst=H, beta_stab=beta_stab, kalman_beta=kb, z=z, long=lng,
-                              bt=bt, spread=s))
+                              bt=bt, spread=s, leg_ou=leg_ou))
     found = [f for f in found if f]
     return found, tested, cointegrated
 
@@ -696,8 +709,12 @@ def main():
         print("fundamentals...", file=sys.stderr)
         fund = yf_fundamentals([t for t in tickers if t in px.columns])
 
-    # --- clean prices
-    px = px.dropna(how="all").ffill(limit=3)
+    # --- clean prices (drop today's bar if the run happens before the European close)
+    px = px.dropna(how="all")
+    now = dt.datetime.utcnow()
+    if len(px) and px.index[-1].date() == now.date() and now.hour < 17 and not args.synthetic:
+        px = px.iloc[:-1]
+    px = px.ffill(limit=3)
     keep = [t for t in px.columns if px[t].iloc[-FORM_WIN:].notna().sum() >= FORM_WIN - 10]
     missing = sorted(set(tickers) - set(keep))
     if missing:
@@ -768,14 +785,12 @@ def main():
         lng_t = p["A"] if p["long"] == "A" else p["B"]
         ref_t = p["B"] if p["long"] == "A" else p["A"]
         ou = p["ou"]
-        gap = ou["m"] - (p["spread"][-1])  # spread must rise by gap (if long A)
-        if p["long"] == "A":
-            gap_leg, s_leg = gap, ou["s_eq"]
-        else:
-            gap_leg, s_leg = -gap / p["beta"], ou["s_eq"] / p["beta"]
-        lv = levels_from_gap(float(px[lng_t].iloc[-1]), gap_leg, s_leg, float(vol20[lng_t]), ou["hl"])
+        lo = p["leg_ou"]
+        lv = levels_from_gap(float(px[lng_t].iloc[-1]), lo["m"] - lo["last"], lo["s_eq"], float(vol20[lng_t]), ou["hl"])
+        if lv["exp_pct"] is None or lv["exp_pct"] <= 0 or lv["exp_pct"] > MAX_EXP:
+            continue
         az = abs(p["z"])
-        tier = "SIGNAL" if az >= Z_ENTRY else "WATCH"
+        tier = "SIGNAL" if (az >= Z_ENTRY and p["beta_stab"] <= 1.0) else "WATCH"
         strength = clip((az - 1.5) / 1.5, 0, 1)
         q = 0.4 * (1.0 if p["p"] < 0.01 else 0.6) + 0.2 * (1.0 if (p["p_long"] or 1) < 0.10 else 0.0) \
             + 0.2 * (1.0 if p["beta_stab"] < 0.3 else 0.5 if p["beta_stab"] < 0.6 else 0.0) \
@@ -815,7 +830,9 @@ def main():
         ou = r["ou"]
         gap = ou["m"] - ou["X"][-1]
         lv = levels_from_gap(float(px[t].iloc[-1]), gap, ou["s_eq"], float(vol20[t]), ou["hl"])
-        tier = "SIGNAL" if s <= -S_ENTRY else "WATCH"
+        if lv["exp_pct"] is None or lv["exp_pct"] <= 0 or lv["exp_pct"] > MAX_EXP:
+            continue
+        tier = "SIGNAL" if (s <= -S_ENTRY and ou["hl"] >= RESID_HL_MIN) else "WATCH"
         strength = clip((abs(s) - 1.0) / 1.5, 0, 1)
         q = 0.5 * clip((ou["kappa"] - KAPPA_MIN) / 30, 0, 1) + 0.5
         bq = bt_quality(r["bt"])
