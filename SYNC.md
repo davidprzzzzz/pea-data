@@ -3,7 +3,7 @@
 Artifact: see `ARTIFACT_URL` below (PEA RV Screener). Data is produced by `.github/workflows/screen.yml`
 (Sundays 17:23 UTC) which runs `screener.py` with yfinance and commits `data/latest.json`.
 
-ARTIFACT_URL = (filled in after first publish)
+ARTIFACT_URL = https://claude.ai/artifact/ACPKg49suwCFfuXav9iocP
 
 1. **Fresh data.** `git pull`. If `data/latest.json` `meta.as_of` is older than the last trading day
    (Friday), run `gh workflow run screen.yml -R davidprzzzzz/pea-data --ref main`, `gh run watch`, `git pull`.
